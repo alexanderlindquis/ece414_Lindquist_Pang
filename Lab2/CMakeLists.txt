@@ -8,11 +8,13 @@ pico_sdk_init()
 
 add_executable(main
         main.c
+        sw_in.c
+        led_out.c
         )
 
 # pull in common dependencies
 target_link_libraries(
-        Lab2
+        main
         pico_stdlib
         pico_bootsel_via_double_reset
 )

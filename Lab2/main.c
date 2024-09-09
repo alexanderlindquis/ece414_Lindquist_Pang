@@ -2,7 +2,7 @@
 #include "sw_in.h"
 #include "led_out.h"
 
-main(){
+int main(){
     bool in1, in2;
     uint16_t out;
     sw_in_init();
@@ -12,15 +12,17 @@ main(){
         in2 = sw_in_read2();
         //Compute 'out'
         if (in1 && in2){
-            out = 0x00ff;
+            out = 0xFF;
         }else if (in1 && !in2){
-            out = 0x0001;
-        }else if (!in && in2){
-            out = 0x0080;
-        }else if (!in && !in2){
-            out = 0x0000;
+            out = 0x01;
+        }else if (!in1 && in2){
+            out = 0x80;
+        }else if (!in1 && !in2){
+            out = 0x00;
         }
 
         led_out_write(out);
+
+         sleep_ms(50);
     }
 }
