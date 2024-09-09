@@ -11,6 +11,16 @@ main(){
         in1 = sw_in_read1();
         in2 = sw_in_read2();
         //Compute 'out'
+        if (in1 && in2){
+            out = 0x00ff;
+        }else if (in1 && !in2){
+            out = 0x0001;
+        }else if (!in && in2){
+            out = 0x0080;
+        }else if (!in && !in2){
+            out = 0x0000;
+        }
+
         led_out_write(out);
     }
 }
