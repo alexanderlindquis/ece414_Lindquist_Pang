@@ -1,3 +1,10 @@
+/* 
+ * File:   sw_in.h
+ * Author: nestorj
+ *
+ * Module to initialize and use two GPIO inputs
+ * as switches with internall pullup
+ */
 #ifndef SW_IN_H
 #define SW_IN_H
 

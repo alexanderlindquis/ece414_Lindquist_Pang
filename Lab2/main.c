@@ -1,3 +1,8 @@
+/* 
+ * Module to set up outputs of GPIO pins with different inputs
+ * ECE 414 Lafayette College 
+ * Group 5
+ */
 #include "pico/stdlib.h"
 #include "sw_in.h"
 #include "led_out.h"

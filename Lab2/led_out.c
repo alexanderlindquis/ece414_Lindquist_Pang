@@ -1,3 +1,10 @@
+/*
+ * led_out - module  to write an 8-bit value to pins 
+ * GPIO9-GPIO2
+ * 
+ * ECE 414 - Lafayette College
+ * J. Nestor July 2023 
+ */
 #include "led_out.h"
 #include "pico/stdlib.h"
 

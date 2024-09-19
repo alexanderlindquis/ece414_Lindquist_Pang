@@ -1,12 +1,19 @@
+/* 
+ * File:   sw_in.h
+ * Author: nestorj
+ *
+ * Module to initialize and use two GPIO inputs
+ * as switches with internall pullup
+ */
 #include "sw_in.h"
 #include "pico/stdlib.h"
 
 void sw_in_init() {
     gpio_init(SW1_PIN);
-    gpio_set_dir(SW1_PIN, GPIO_IN);
+    gpio_set_dir(SW1_PIN, false);
     gpio_pull_up(SW1_PIN);
     gpio_init(SW2_PIN);
-    gpio_set_dir(SW2_PIN, GPIO_IN);
+    gpio_set_dir(SW2_PIN, false);
     gpio_pull_up(SW2_PIN);
 }
 
