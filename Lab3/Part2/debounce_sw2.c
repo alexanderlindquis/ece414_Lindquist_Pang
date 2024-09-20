@@ -18,13 +18,13 @@ static bool btn_pressed;
 
 static enum DB_States {NOPUSH, MAYBEPUSH, PUSHED, MAYBENOPUSH} DB_State;
 
-void debounce_sw1_init() {
+void debounce_sw2_init() {
     DB_State = NOPUSH;
     btn_pressed = false;
 }
 
-void debounce_sw1_tick() {
-    bool btn = sw_in_read1();
+void debounce_sw2_tick() {
+    bool btn = sw_in_read2();
     switch(DB_State) {
         case NOPUSH:
             if (btn) DB_State = MAYBEPUSH;
@@ -57,7 +57,7 @@ void debounce_sw1_tick() {
 
 // return TRUE the first time the function is called after the button has 
 // been pressed.  Return FALSE until the button is released and pressed again
-bool debounce_sw1_pressed() {
+bool debounce_sw2_pressed() {
     if (btn_pressed) {
         btn_pressed = false; 
         return true;
