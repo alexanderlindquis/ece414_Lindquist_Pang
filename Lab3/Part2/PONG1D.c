@@ -4,13 +4,13 @@
 #include "sw_in.h"
 
 static enum PONG_States (LEFT, RIGHT, SERVE, BLINK} PONG_State;
+const uint32_t MASK_9_2 = 0x000003fc;
+uint32_t outval = 0x1;
 //main logic
 int main(){
   tBtn = timer_read();
   tPong = timer_read();
   uint32 PONGPD_MS = 300;
-  const uint32_t MASK_9_2 = 0x000003fc;
-  uint32_t outval = 0x1;
   gpio_init_mask(MASK_9_2);
   gpio_set_dir_out_masked(MASK_9_2);
   while(true){
@@ -27,7 +27,7 @@ int main(){
 }
 
 //Update Game State based on button presses, current active player, 
-void pong_tick(){
+void pong_tick(uint32_t outval){
   switch(PONG_State){
     case SERVE:
       if(P0 && debounce_sw1_pressed()){
