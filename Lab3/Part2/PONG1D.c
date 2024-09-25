@@ -27,7 +27,7 @@ int main(){
 }
 
 //Update Game State based on button presses, current active player, 
-void pong_tick(uint32_t outval){
+void pong_tick(){
   switch(PONG_State){
     case SERVE:
       if(P0 && debounce_sw1_pressed()){
