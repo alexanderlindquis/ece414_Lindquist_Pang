@@ -20,9 +20,11 @@ int main(){
     if(timer_elapsed_ms(tBtn, tCurrent) >= DEBOUNCEPD_MS){
       debounce_sw1_tick();
       deounce_sw2_tick();
+      tBtn = timer_read();
     }
     if(debounce_sw1_pressed() || debounce_sw2_pressed() || timer_elapsed_ms(tPong, tCurrent) >= PONGPD_MS){
       pong_tick();
+      tPong = timer_read();
     }
   }
 }
