@@ -6,6 +6,7 @@
 static enum PONG_States (LEFT, RIGHT, SERVE, BLINK} PONG_State;
 const uint32_t MASK_9_2 = 0x000003fc;
 uint32_t outval = 0x1;
+bool P0 = false;
 //main logic
 int main(){
   tBtn = timer_read();
