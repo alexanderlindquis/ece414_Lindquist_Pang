@@ -4,5 +4,5 @@
 #include "pico/stdlib.h"
 
 void led_out_init();
-void led_out_write(bool val);
+void led_out_write(uint8_t val);
 #endif

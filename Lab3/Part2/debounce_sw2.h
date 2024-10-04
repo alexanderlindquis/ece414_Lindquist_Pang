@@ -5,8 +5,8 @@
  * Debounce a switch read by the sw_in module
  */
 
-#ifndef DEBOUNCER_H
-#define	DEBOUNCER_H
+#ifndef DEBOUNCER2_H
+#define	DEBOUNCER2_H
 
 #include "pico/stdlib.h"
 
