@@ -23,5 +23,6 @@ target_link_libraries(
 )
 
 # create map/bin/hex file etc.
+pico_enable_stdio_uart(PONG1D 1)
 pico_add_extra_outputs(PONG1D)
 
