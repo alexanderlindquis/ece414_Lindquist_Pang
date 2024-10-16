@@ -11,9 +11,15 @@
 #include "hardware/gpio.h"
 #include "hardware/adc.h"
 
+uint16_t x = 0, y = 0;
+uint16_t last_x = 0, last_y = 0;
+char buffer[30];
+ts_lcd_init();
+uint16_t buttonVal;
+
 void drawInterface();
 
-uint16_t getBotton();
+uint16_t getButton();
 
 void displayResult();
 

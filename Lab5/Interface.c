@@ -7,14 +7,6 @@
 #include "ts_lcd.h"
 #include "Interface.h"
 
-
-stdio_init_all();
-uint16_t x = 0, y = 0;
-uint16_t last_x = 0, last_y = 0;
-char buffer[30];
-ts_lcd_init();
-uint16_t buttonVal=getBotton();
-
 void drawInterface() {
 tft_drawRoundRect(10,40,72,44,8,0xFFFF);//7
 tft_drawRoundRect(86,40,72,44,8,0xFFFF);//8
@@ -42,7 +34,7 @@ tft_setTextSize(2);
 tft_writeString(buffer);
 }
 
-uint16_t getBotton(){
+uint16_t getButton(){
     if (get_ts_lcd(&x, &y)){
         if (x<82 && x>10 && y<84 && y>40){
             return 7;
@@ -51,7 +43,7 @@ uint16_t getBotton(){
         }else if (x<234 && x>162 && y<84 && y>40){
             return 9;
         }else if (x<310 && x>238 && y<84 && y>40){
-            return 10;
+            return 10; 
         }else if (x<82 && x>10 && y<132 && y>88){
             return 4;
         }else if (x<158 && x>86 && y<132 && y>88){
@@ -80,7 +72,7 @@ uint16_t getBotton(){
      }
 }
 void displayResult(){
-if (buttonVal >= 0 && buttonVal <= 9) {  
+    if (buttonVal >= 0 && buttonVal <= 9) {  
         char digitStr[2]; 
         snprintf(digitStr, sizeof(digitStr), "%d", buttonVal);
         strncat(buffer, digitStr, sizeof(buffer) - strlen(buffer) - 1);
