@@ -3,8 +3,7 @@
 
 #include <stdio.h>         
 #include <math.h>          
-#include "pico/stdlib.h"  
-#include "pico/rand.h"    
+#include "pico/stdlib.h"     
 #include "TFTMaster.h"   
 #include "TouchScreen.h"
 #include "ts_lcd.h"

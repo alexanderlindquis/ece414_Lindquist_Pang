@@ -2,23 +2,24 @@ cmake_minimum_required(VERSION 3.13)
 
 include(pico_sdk_import.cmake)
 
-project(ts_test)
+project(calculator)
 
 pico_sdk_init()
 
-add_executable(ts_test)
+add_executable(calculator)
 
-pico_generate_pio_header(ts_test ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
+pico_generate_pio_header(calculator ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
 
-target_sources(ts_test PRIVATE 
-    ts_test.c
+target_sources(calculator PRIVATE 
+    calculator.c
     TouchScreen.c
     TFTMaster.c
     glcdfont.c
     ts_lcd.c
+    Interface.c
     )
 
-target_link_libraries(ts_test PRIVATE 
+target_link_libraries(calculator PRIVATE 
     pico_stdlib 
     hardware_adc 
     hardware_gpio hardware_pio 
@@ -26,7 +27,7 @@ target_link_libraries(ts_test PRIVATE
     pico_bootsel_via_double_reset
     )
 
-pico_add_extra_outputs(ts_test)
+pico_add_extra_outputs(calculator)
 
 
 

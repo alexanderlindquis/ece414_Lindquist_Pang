@@ -18,7 +18,7 @@
 #define MIN_PRESSURE 500
 #define MAX_PRESSURE 50
 
-void ts_lcd_init(void)
+void ts_lcd_init()
 {
     adc_init();
     tft_init_hw();
