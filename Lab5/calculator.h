@@ -21,6 +21,8 @@ int main(){
             buttonVal = getButton();
             if(buttonVal == 14){
                 state == INITIAL;
+                val1 = val2 = null;
+                buffer = "";
             }
             else{
                 switch(state){
@@ -36,20 +38,25 @@ int main(){
                     //Button val added to buffer string / val1
                         if(buttonVal >= 0 && buttonVal <= 9){
                             val1 = val1 * 10 + buttonVal;
+                            displayResult()
                         }
                         if(buttonVal >= 10 && buttonVal 13){
                             switch(buttonVal){
                                 case 10:
                                     op = ADD;
+                                    buffer += "+";
                                 break;
                                 case 11: 
                                     op = SUBTRACT;
+                                    buffer += "-";
                                 break;
                                 case 12:
                                     op = MULTIPLY;
+                                    buffer += "*";
                                 break;
                                 case 13: 
                                     op = DIVIDE;
+                                    buffer += "/";
                                 break;
                             }
                             state = INPUT2;
@@ -61,6 +68,7 @@ int main(){
                     case INPUT2:
                         if(buttonVal >= 0 && buttonVal <= 9){
                             val2 = val2 * 10 + buttonVal;
+                            displayResult();
                         }
                         if(buttonVal >= 10 && buttonVal 13){
                             if(val2 == 0 && op == DIVIDE){
@@ -83,19 +91,24 @@ int main(){
                                     case DIVIDE:
                                         val1 = val1 / val2;
                                 }
+                                buffer = to_string(val1);
                             }
                             switch(buttonVal){
                                 case 10:
                                     op = ADD;
+                                    buffer += "+";
                                 break;
                                 case 11: 
                                     op = SUBTRACT;
+                                    buffer += "-";
                                 break;
                                 case 12:
                                     op = MULTIPLY;
+                                    buffer += "*";
                                 break;
                                 case 13: 
                                     op = DIVIDE;
+                                    buffer += "/";
                                 break;
                             }
                         }
@@ -113,15 +126,25 @@ int main(){
                                     case DIVIDE:
                                         val1 = val1 / val2;
                             }
+                            buffer = to_string(val1);
                             state = INPUT1;
                         }
                         else{
                             state = ERROR;
                         }
                     break;
+                    case DIV0:
+                        buffer = "DIV0";
+                        wait(200);
+                        state = INITIAL;
+                    break;
+                    case ERROR:
+                        buffer = "ERR";
+                        wait(200);
+                        state = INITIAL;
+                    break;
                 }
                 //draw
-                displayResult();
                 drawInterface();
             }
         }
