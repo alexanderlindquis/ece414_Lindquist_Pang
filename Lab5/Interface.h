@@ -1,25 +1,21 @@
-#ifndef Interface
-#define Interface
+#ifndef INTERFACE_H
+#define INTERFACE_H
 
-#include <stdio.h>         
-#include <math.h>          
-#include "pico/stdlib.h"     
-#include "TFTMaster.h"   
-#include "TouchScreen.h"
-#include "ts_lcd.h"
-#include "hardware/gpio.h"
-#include "hardware/adc.h"
+#include <stdint.h>
+#include "pico/stdlib.h"
+#include "TFTMaster.h"
 
-uint16_t x = 0, y = 0;
-uint16_t last_x = 0, last_y = 0;
-char buffer[30];
-ts_lcd_init();
-uint16_t buttonVal;
+#define BTN_NONE   255
+#define BTN_CLEAR  10
+#define BTN_EQUAL  11
+#define BTN_PLUS   12
+#define BTN_MINUS  13
+#define BTN_MULT   14
+#define BTN_DIV    15
 
+void interface_init();
 void drawInterface();
-
-uint16_t getButton();
-
-void displayResult();
+void display(const char* text, bool is_error);
+uint16_t getButton(uint16_t x, uint16_t y);
 
 #endif
