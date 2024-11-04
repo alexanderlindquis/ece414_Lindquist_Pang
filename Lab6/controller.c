@@ -1,24 +1,16 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/adc.h"
-#include "TouchScreen.h"
-#include "TFTMaster.h"
-#include "ts_lcd.h"
 #include "ic.h"
-float Kp, Ki, Kd;
-float IntegMax = 200;
-float IntegMin = 0;
-float actualPrev, Integ = 0;
-float desired;
-float pwm_level;
+#include "pwm_pin.h"
+#include "controller.h"
 
-static inline int32_t max (uint32_t a, uint32_t b) {
+
+static inline int32_t max(uint32_t a, uint32_t b) {
     if (a > b) return a;
     else return b;
 }
 
-static inline int32_t min (uint32_t a, uint32_t b) {
+static inline int32_t min(uint32_t a, uint32_t b) {
     if (a < b) return a;
     else return b;
 }
