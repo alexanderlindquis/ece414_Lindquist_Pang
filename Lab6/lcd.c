@@ -5,7 +5,8 @@
 #include "TFTMaster.h"
 #include "lcd.h"
 #include "timer.h"
-char buffer[10];
+#include "controller.h"
+
 uint32_t time_start, time_b;
 
 void lcd_init(){
@@ -19,11 +20,9 @@ void lcd_init(){
     time_start = timer_read();
 }
 void dpcommand(){
-    if(uart_is_readable(uart0)){
-        tft_setCursor(0,0);
-        tft_setTextColor(ILI9340_WHITE);
-        tft_writeString(c)
-    }
+    tft_setCursor(0,0);
+    tft_setTextColor(ILI9340_WHITE);
+    tft_writeString(buffer);
 }
 void dprpm(){
     uint32_t rpm = ic_getrpm();
@@ -38,8 +37,8 @@ void dprpm(){
         uint16_t x = elapsed/10;
         
         tft_drawPixel(x,y,ILI9340_RED);
-        tft_drawPixel(x,desire,ILI9340_GREEN);
-        tft_drawPixel(x,pwm,ILI9340_BLUE);
+        tft_drawPixel(x,desired,ILI9340_GREEN);
+        tft_drawPixel(x,pwm_level,ILI9340_BLUE);
         if(x>=300){
             tft_fillScreen(ILI9340_BLACK);
             time_start = timer_read;

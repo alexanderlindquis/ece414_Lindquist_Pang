@@ -5,7 +5,7 @@
 #include "hardware/uart.h"
 #include "debounce_sw1.h"
 #include "controller.h"
-
+#include "lcd.h"
 #define UART_ID uart0
 #define BAUD_RATE 115200
 #define UART_TX_PIN 0
@@ -22,9 +22,10 @@ int main(){
     state = SELECT;
     uint32_t last_time = timer_read();
     while(1){
+        dprpm();
         uint32_t current_time = timer_read();
         uart_input_tick();
-            if(time_elapsed_ms(last_time, current_time) >= 50000){
+            if(time_elapsed_ms(last_time, current_time) >= 50){
                 controller_tick();
             }
             last_time = current_time;
@@ -35,6 +36,7 @@ int main(){
 void uart_input_tick(){
     if(uart_is_readable(uart0)){
         char c = uart_getc(uart0);
+        sprintf(buffer,c);
         switch(state){
             case SELECT:
                 if(c == 's'){
@@ -92,8 +94,4 @@ void uart_input_tick(){
             break;
         }
     }
-}
-
-void lcd_display_tick(){
-
 }

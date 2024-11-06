@@ -3,11 +3,10 @@
 
 #include <stdio.h>         
 #include <math.h>         
-#include "pico/stdlib.h"   
-#include "pico/rand.h"     
-#include "TFTMaster.h
+#include "pico/stdlib.h"        
+#include "TFTMaster.h"
 #include "ic.h"
-#include "
+char buffer[10];
 
 
 void lcd_init();
