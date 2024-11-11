@@ -5,6 +5,7 @@
 #include "TFTMaster.h"
 #include "lcd.h"
 #include "timer.h"
+#include "controller.h"
 char buffer[10];
 uint32_t time_start, time_b;
 
@@ -38,8 +39,8 @@ void dprpm(){
         uint16_t x = elapsed/10;
         
         tft_drawPixel(x,y,ILI9340_RED);
-        tft_drawPixel(x,desire,ILI9340_GREEN);
-        tft_drawPixel(x,pwm,ILI9340_BLUE);
+        tft_drawPixel(x,desired,ILI9340_GREEN);
+        tft_drawPixel(x,pwm_level,ILI9340_BLUE);
         if(x>=300){
             tft_fillScreen(ILI9340_BLACK);
             time_start = timer_read;

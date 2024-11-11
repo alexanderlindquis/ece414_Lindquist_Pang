@@ -10,11 +10,11 @@ add_executable(PID
         )
 
 pico_generate_pio_header(PID
-        ${CMAKE_CURRENT_LIST_DIR}/ic_pio.pio )
+        ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
 
         target_sources(PID PRIVATE 
         PID.c
-        controller.c
+        
         pwm_pin.c
         TouchScreen.c
         TFTMaster.c
@@ -24,9 +24,11 @@ pico_generate_pio_header(PID
         )
 # pull in common dependencies
 target_link_libraries(
-        PID 
+        PID PRIVATE
         pico_stdlib
         hardware_pio
+        hardware_pwm
+        hardware_adc
         pico_bootsel_via_double_reset
         )
 

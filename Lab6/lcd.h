@@ -1,13 +1,11 @@
-#ifndef lcd.h
-#define lcd.h
+#ifndef lcd_h
+#define lcd_h
 
 #include <stdio.h>         
 #include <math.h>         
-#include "pico/stdlib.h"   
-#include "pico/rand.h"     
-#include "TFTMaster.h
-#include "ic.h"
-#include "
+#include "pico/stdlib.h"      
+#include "TFTMaster.h"
+
 
 
 void lcd_init();
