@@ -4,9 +4,13 @@
 #include "hardware/gpio.h"
 #include "hardware/uart.h"
 #include "controller.h"
+<<<<<<< HEAD
 #include "timer.h"
 #include "lcd.h"
 
+=======
+#include "lcd.h"
+>>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
 #define UART_ID uart0
 #define BAUD_RATE 115200
 #define UART_TX_PIN 0
@@ -17,9 +21,30 @@ enum OP {S, P, I, D} op;
 float updateVal, updateDigit = 0;
 bool dec; //entering decimals
 
+<<<<<<< HEAD
+=======
+int main(){
+    ic_init();
+    controller_init();
+    state = SELECT;
+    uint32_t last_time = timer_read();
+    while(1){
+        dprpm();
+        uint32_t current_time = timer_read();
+        uart_input_tick();
+            if(time_elapsed_ms(last_time, current_time) >= 50){
+                controller_tick();
+            }
+            last_time = current_time;
+        
+    }
+}
+
+>>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
 void uart_input_tick(){
     if(uart_is_readable(uart0)){
         char c = uart_getc(uart0);
+        sprintf(buffer,c);
         switch(state){
             case SELECT:
                 if(c == 's'){
@@ -77,6 +102,7 @@ void uart_input_tick(){
             break;
         }
     }
+<<<<<<< HEAD
 }
 int main(){
     ic_init();
@@ -97,3 +123,6 @@ int main(){
 }
 
 
+=======
+}
+>>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f

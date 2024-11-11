@@ -6,7 +6,11 @@
 #include "lcd.h"
 #include "timer.h"
 #include "controller.h"
+<<<<<<< HEAD
 char buffer[10];
+=======
+
+>>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
 uint32_t time_start, time_b;
 
 void lcd_init(){
@@ -20,11 +24,9 @@ void lcd_init(){
     time_start = timer_read();
 }
 void dpcommand(){
-    if(uart_is_readable(uart0)){
-        tft_setCursor(0,0);
-        tft_setTextColor(ILI9340_WHITE);
-        tft_writeString(c)
-    }
+    tft_setCursor(0,0);
+    tft_setTextColor(ILI9340_WHITE);
+    tft_writeString(buffer);
 }
 void dprpm(){
     uint32_t rpm = ic_getrpm();

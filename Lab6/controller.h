@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
+=======
+#ifndef CONTROLLER.H
+#define CONTROLLER.H
+>>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "ic.h"
