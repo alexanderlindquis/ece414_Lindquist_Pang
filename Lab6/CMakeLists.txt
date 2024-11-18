@@ -9,25 +9,18 @@ pico_sdk_init()
 add_executable(PID
         )
 
-<<<<<<< HEAD
-pico_generate_pio_header(PID
-        ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
-=======
 pico_generate_pio_header(PID ${CMAKE_CURRENT_LIST_DIR}/SPIPIO.pio)
->>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
 
 target_sources(PID PRIVATE 
         PID.c
-<<<<<<< HEAD
-        
-=======
->>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
         pwm_pin.c
         TouchScreen.c
         TFTMaster.c
         glcdfont.c
         ic_pio.c
         timer.c
+        lcd.c
+        controller.c
         )
 # pull in common dependencies
 target_link_libraries(
@@ -38,10 +31,7 @@ target_link_libraries(
         hardware_pio
         hardware_pwm
         hardware_adc
-<<<<<<< HEAD
-=======
         hardware_irq
->>>>>>> 8a7e469995f4c22f99e1a86db6c5ac6c54816c2f
         pico_bootsel_via_double_reset
         )
 
