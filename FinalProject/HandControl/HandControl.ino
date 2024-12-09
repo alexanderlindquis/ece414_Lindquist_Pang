@@ -1,4 +1,3 @@
-// Hand Controller Module
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include <Adafruit_LSM6DSOX.h>
@@ -11,12 +10,6 @@
 #define TFT_RST   20
 #define TFT_MOSI  19
 #define TFT_SCK   17
-
-// Constants
-#define MIN_ANGLE 5.0
-#define MAX_ANGLE 60.0
-#define EMERGENCY_ANGLE 80.0
-#define EMERGENCY_RECOVERY_DELAY 1000
 
 // Movement states
 enum MovementState {
@@ -31,19 +24,35 @@ enum MovementState {
     STATE_FORWARD_LEFT
 };
 
-// Objects
+// Create objects
 Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
 Adafruit_LSM6DSOX sox;
 
 // Global variables
 float pitch = 0.0, roll = 0.0;
 float compAngleX = 0.0, compAngleY = 0.0;
-float pitch_offset = 0.0, roll_offset = 0.0;
+float pitch_offset = 0.0;
+float roll_offset = 0.0;
 unsigned long timer = 0;
 MovementState currentState = STATE_STOPPED;
 int currentSpeed = 0;
-bool emergencyStopActive = false;
-unsigned long emergencyStopTime = 0;
+
+void drawInitialDisplay() {
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9341_CYAN);
+    tft.setCursor(10, 10);
+    tft.println("Hand Controller");
+    
+    tft.setTextColor(ILI9341_WHITE);
+    tft.setCursor(10, 50);
+    tft.println("Pitch:");
+    tft.setCursor(10, 80);
+    tft.println("Roll:");
+    tft.setCursor(10, 110);
+    tft.println("Speed:");
+    tft.setCursor(10, 140);
+    tft.println("State:");
+}
 
 void calibrateSensor() {
     const int numSamples = 100;
@@ -69,29 +78,13 @@ void calibrateSensor() {
     
     pitch_offset = pitch_sum / numSamples;
     roll_offset = roll_sum / numSamples;
+    
     compAngleX = 0;
     compAngleY = 0;
 }
 
-void initializeDisplay() {
-    tft.setTextSize(2);
-    tft.setTextColor(ILI9341_CYAN);
-    tft.setCursor(10, 10);
-    tft.println("Hand Controller");
-    
-    tft.setTextColor(ILI9341_WHITE);
-    tft.setCursor(10, 50);
-    tft.println("Pitch:");
-    tft.setCursor(10, 80);
-    tft.println("Roll:");
-    tft.setCursor(10, 110);
-    tft.println("Speed:");
-    tft.setCursor(10, 140);
-    tft.println("State:");
-}
-
 void setup() {
-    Serial1.begin(9600);  // Bluetooth
+    Serial1.begin(9600);
     
     tft.begin();
     tft.setRotation(0);
@@ -105,13 +98,11 @@ void setup() {
         while (1) delay(100);
     }
     
-    // Configure sensor
     sox.setAccelRange(LSM6DS_ACCEL_RANGE_4_G);
     sox.setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
     sox.setAccelDataRate(LSM6DS_RATE_104_HZ);
     sox.setGyroDataRate(LSM6DS_RATE_104_HZ);
     
-    // Calibration message
     tft.setTextColor(ILI9341_GREEN);
     tft.setTextSize(2);
     tft.setCursor(10, 10);
@@ -121,7 +112,7 @@ void setup() {
     calibrateSensor();
     
     tft.fillScreen(ILI9341_BLACK);
-    initializeDisplay();
+    drawInitialDisplay();
     
     timer = millis();
 }
@@ -140,12 +131,7 @@ void updateSensorFusion() {
                                sqrt(accel.acceleration.y * accel.acceleration.y + 
                                    accel.acceleration.z * accel.acceleration.z)) * RAD_TO_DEG - pitch_offset;
 
-    float alpha = 0.98;
-    float gyro_magnitude = sqrt(gyro.gyro.x * gyro.gyro.x + gyro.gyro.y * gyro.gyro.y);
-    if (gyro_magnitude > 1.0) {
-        alpha = 0.99;  // More gyro weight during fast movement
-    }
-
+    const float alpha = 0.96;
     compAngleX = alpha * (compAngleX + gyro.gyro.x * dt) + (1 - alpha) * accel_angle_x;
     compAngleY = alpha * (compAngleY + gyro.gyro.y * dt) + (1 - alpha) * accel_angle_y;
 
@@ -154,111 +140,66 @@ void updateSensorFusion() {
 }
 
 void calculateMovement() {
-    // Check for emergency stop
-    if (abs(pitch) > EMERGENCY_ANGLE || abs(roll) > EMERGENCY_ANGLE) {
-        if (!emergencyStopActive) {
-            emergencyStopActive = true;
-            emergencyStopTime = millis();
-            currentState = STATE_STOPPED;
-            currentSpeed = 0;
-        }
-        return;
-    }
-    
-    // Handle recovery from emergency stop
-    if (emergencyStopActive) {
-        if (millis() - emergencyStopTime >= EMERGENCY_RECOVERY_DELAY) {
-            emergencyStopActive = false;
-            compAngleX = roll;
-            compAngleY = pitch;
-        } else {
-            currentState = STATE_STOPPED;
-            currentSpeed = 0;
-            return;
-        }
-    }
-    
-    float magnitude = sqrt(pitch * pitch + roll * roll);
-    
-    if (magnitude < MIN_ANGLE) {
+    if (abs(pitch) > 80 || abs(roll) > 80) {
         currentState = STATE_STOPPED;
         currentSpeed = 0;
         return;
     }
     
-    currentSpeed = map(constrain(magnitude, MIN_ANGLE, MAX_ANGLE), MIN_ANGLE, MAX_ANGLE, 0, 100);
-    float direction = atan2(-roll, -pitch) * 180.0 / PI;
+    float magnitude = sqrt(pitch * pitch + roll * roll);
     
-    // Determine movement state based on direction
-    int sector = ((int)(direction + 202.5) % 360) / 45;
-    switch(sector) {
-        case 0: currentState = STATE_FORWARD; break;
-        case 1: currentState = STATE_FORWARD_RIGHT; break;
-        case 2: currentState = STATE_RIGHT; break;
-        case 3: currentState = STATE_BACKWARD_RIGHT; break;
-        case 4: currentState = STATE_BACKWARD; break;
-        case 5: currentState = STATE_BACKWARD_LEFT; break;
-        case 6: currentState = STATE_LEFT; break;
-        case 7: currentState = STATE_FORWARD_LEFT; break;
-        default: currentState = STATE_STOPPED;
+    if (magnitude < 5.0) {
+        currentState = STATE_STOPPED;
+        currentSpeed = 0;
+        return;
     }
+    
+    float direction = atan2(roll, pitch) * 180.0 / PI;
+    currentSpeed = map(constrain(magnitude, 5, 60), 5, 60, 0, 100);
+    
+    if (abs(direction) <= 22.5) currentState = STATE_FORWARD;
+    else if (abs(direction) >= 157.5) currentState = STATE_BACKWARD;
+    else if (abs(direction - 90) <= 22.5) currentState = STATE_RIGHT;
+    else if (abs(direction + 90) <= 22.5) currentState = STATE_LEFT;
+    else if (direction > 22.5 && direction < 67.5) currentState = STATE_FORWARD_RIGHT;
+    else if (direction > 112.5 && direction < 157.5) currentState = STATE_BACKWARD_RIGHT;
+    else if (direction < -22.5 && direction > -67.5) currentState = STATE_FORWARD_LEFT;
+    else if (direction < -112.5 && direction > -157.5) currentState = STATE_BACKWARD_LEFT;
 }
 
 void updateDisplay() {
     char buffer[32];
     
-    // Update pitch
     tft.fillRect(100, 50, 100, 20, ILI9341_BLACK);
     tft.setCursor(100, 50);
     tft.setTextColor(ILI9341_WHITE);
     snprintf(buffer, sizeof(buffer), "%.1f", pitch);
     tft.print(buffer);
     
-    // Update roll
     tft.fillRect(100, 80, 100, 20, ILI9341_BLACK);
     tft.setCursor(100, 80);
     snprintf(buffer, sizeof(buffer), "%.1f", roll);
     tft.print(buffer);
     
-    // Update speed
     tft.fillRect(100, 110, 100, 20, ILI9341_BLACK);
     tft.setCursor(100, 110);
     snprintf(buffer, sizeof(buffer), "%d%%", currentSpeed);
     tft.print(buffer);
     
-    // Update state
     tft.fillRect(100, 140, 140, 20, ILI9341_BLACK);
     tft.setCursor(100, 140);
     tft.setTextColor(ILI9341_YELLOW);
     
     switch(currentState) {
-        case STATE_FORWARD: 
-        tft.print("FORWARD"); 
-        break;
-        case STATE_FORWARD_RIGHT: 
-        tft.print("FWD RIGHT"); 
-        break;
-        case STATE_RIGHT: 
-        tft.print("RIGHT"); 
-        break;
-        case STATE_BACKWARD_RIGHT: 
-        tft.print("BACK RIGHT"); 
-        break;
-        case STATE_BACKWARD: 
-        tft.print("BACKWARD"); 
-        break;
-        case STATE_BACKWARD_LEFT: 
-        tft.print("BACK LEFT"); 
-        break;
-        case STATE_LEFT: 
-        tft.print("LEFT"); 
-        break;
-        case STATE_FORWARD_LEFT: 
-        tft.print("FWD LEFT"); 
-        break;
-
-        default: 
-        tft.print("STOPPED");
+        case STATE_FORWARD: tft.print("FORWARD"); break;
+        case STATE_FORWARD_RIGHT: tft.print("FWD RIGHT"); break;
+        case STATE_RIGHT: tft.print("RIGHT"); break;
+        case STATE_BACKWARD_RIGHT: tft.print("BACK RIGHT"); break;
+        case STATE_BACKWARD: tft.print("BACKWARD"); break;
+        case STATE_BACKWARD_LEFT: tft.print("BACK LEFT"); break;
+        case STATE_LEFT: tft.print("LEFT"); break;
+        case STATE_FORWARD_LEFT: tft.print("FWD LEFT"); break;
+        default: tft.print("STOPPED");
     }
 }
 
@@ -269,22 +210,18 @@ void sendControlData() {
 }
 
 void loop() {
-    static unsigned long lastSensorUpdate = 0;
-    static unsigned long lastDisplayUpdate = 0;
-    
-    unsigned long currentTime = millis();
-    
-    // Sensor update at ~104 Hz (10ms)
-    if (currentTime - lastSensorUpdate >= 10) {
+    static unsigned long lastUpdate = 0;
+    static unsigned long lastUpdate1 = 0;
+    const unsigned long UPDATE_INTERVAL = 2; 
+    const unsigned long UPDATE_INTERVAL1 = 50;
+    if (millis() - lastUpdate1 >= UPDATE_INTERVAL1) {
+      updateDisplay();
+      lastUpdate1 = millis();
+    }
+    if (millis() - lastUpdate >= UPDATE_INTERVAL) {
         updateSensorFusion();
         calculateMovement();
         sendControlData();
-        lastSensorUpdate = currentTime;
-    }
-    
-    // Display update at 10 Hz
-    if (currentTime - lastDisplayUpdate >= 100) {
-        updateDisplay();
-        lastDisplayUpdate = currentTime;
+        lastUpdate = millis();
     }
 }
