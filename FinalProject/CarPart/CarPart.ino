@@ -1,17 +1,15 @@
-// Car Control Code for Raspberry Pi Pico with DRV8871 drivers
+// Debug Car Control Code for DRV8871 drivers
 
 // Pin definitions for motor drivers
-#define MOTOR_LEFT_IN1  2  // GPIO2 to left motor driver IN1
-#define MOTOR_LEFT_IN2  3  // GPIO3 to left motor driver IN2
-#define MOTOR_RIGHT_IN1 4  // GPIO4 to right motor driver IN1
-#define MOTOR_RIGHT_IN2 5  // GPIO5 to right motor driver IN2
+#define MOTOR_LEFT_IN1  2
+#define MOTOR_LEFT_IN2  3
+#define MOTOR_RIGHT_IN1 4
+#define MOTOR_RIGHT_IN2 5
 
 // Constants
-#define MAX_SPEED 153    // ~60% of 255 for 9V power
-#define MIN_SPEED 40     // Minimum speed threshold
-#define RAMP_RATE 5      // Speed change per update
-#define MIN_ANGLE 5.0    // Minimum angle to start moving
-#define MAX_ANGLE 60.0   // Angle for maximum speed
+#define MAX_SPEED 153     // ~60% of 255 for 9V power
+#define MIN_ANGLE 5.0     // Minimum angle to start moving
+#define MAX_ANGLE 60.0    // Angle for maximum speed
 #define EMERGENCY_ANGLE 80.0
 
 // Buffer for receiving data
@@ -22,174 +20,183 @@ int bufferIndex = 0;
 float receivedPitch = 0.0;
 float receivedRoll = 0.0;
 
-// Motor speeds
-int targetLeftSpeed = 0;
-int targetRightSpeed = 0;
-int currentLeftSpeed = 0;
-int currentRightSpeed = 0;
-
 void setup() {
-    // Initialize serial for Bluetooth
-    Serial1.begin(9600);
+    Serial.begin(115200);  // USB Serial for debugging
+    Serial1.begin(9600);   // Bluetooth Serial
     
-    // Initialize motor control pins
+    // Initialize motor pins
     pinMode(MOTOR_LEFT_IN1, OUTPUT);
     pinMode(MOTOR_LEFT_IN2, OUTPUT);
     pinMode(MOTOR_RIGHT_IN1, OUTPUT);
     pinMode(MOTOR_RIGHT_IN2, OUTPUT);
     
-    // Ensure motors are stopped at startup
     stopMotors();
+    Serial.println("\n=== Car Control System Starting ===");
+    
+    // Basic motor test
+    Serial.println("\nTesting motors...");
+    testMotors();
+    
+    Serial.println("\nReady to receive commands");
+    Serial.println("Format: C,pitch,roll");
 }
 
-void setLeftMotor(int speed) {
-    // Gradually adjust speed
-    if (currentLeftSpeed < speed) {
-        currentLeftSpeed = min(currentLeftSpeed + RAMP_RATE, speed);
-    } else if (currentLeftSpeed > speed) {
-        currentLeftSpeed = max(currentLeftSpeed - RAMP_RATE, speed);
-    }
+void testMotors() {
+    Serial.println("Testing Left Motor Forward");
+    analogWrite(MOTOR_LEFT_IN1, 100);
+    analogWrite(MOTOR_LEFT_IN2, 0);
+    delay(1000);
+    stopMotors();
+    delay(500);
     
-    // Apply speed limits
-    currentLeftSpeed = constrain(currentLeftSpeed, -MAX_SPEED, MAX_SPEED);
+    Serial.println("Testing Left Motor Reverse");
+    analogWrite(MOTOR_LEFT_IN1, 0);
+    analogWrite(MOTOR_LEFT_IN2, 100);
+    delay(1000);
+    stopMotors();
+    delay(500);
     
-    // Apply minimum speed threshold
-    if (abs(currentLeftSpeed) < MIN_SPEED) {
-        currentLeftSpeed = 0;
-    }
+    Serial.println("Testing Right Motor Forward");
+    analogWrite(MOTOR_RIGHT_IN1, 100);
+    analogWrite(MOTOR_RIGHT_IN2, 0);
+    delay(1000);
+    stopMotors();
+    delay(500);
     
-    // Set motor direction and speed
-    if (currentLeftSpeed >= 0) {
-        analogWrite(MOTOR_LEFT_IN1, currentLeftSpeed);
-        analogWrite(MOTOR_LEFT_IN2, 0);
-    } else {
-        analogWrite(MOTOR_LEFT_IN1, 0);
-        analogWrite(MOTOR_LEFT_IN2, -currentLeftSpeed);
-    }
-}
-
-void setRightMotor(int speed) {
-    // Gradually adjust speed
-    if (currentRightSpeed < speed) {
-        currentRightSpeed = min(currentRightSpeed + RAMP_RATE, speed);
-    } else if (currentRightSpeed > speed) {
-        currentRightSpeed = max(currentRightSpeed - RAMP_RATE, speed);
-    }
+    Serial.println("Testing Right Motor Reverse");
+    analogWrite(MOTOR_RIGHT_IN1, 0);
+    analogWrite(MOTOR_RIGHT_IN2, 100);
+    delay(1000);
+    stopMotors();
     
-    // Apply speed limits
-    currentRightSpeed = constrain(currentRightSpeed, -MAX_SPEED, MAX_SPEED);
-    
-    // Apply minimum speed threshold
-    if (abs(currentRightSpeed) < MIN_SPEED) {
-        currentRightSpeed = 0;
-    }
-    
-    // Set motor direction and speed
-    if (currentRightSpeed >= 0) {
-        analogWrite(MOTOR_RIGHT_IN1, currentRightSpeed);
-        analogWrite(MOTOR_RIGHT_IN2, 0);
-    } else {
-        analogWrite(MOTOR_RIGHT_IN1, 0);
-        analogWrite(MOTOR_RIGHT_IN2, -currentRightSpeed);
-    }
+    Serial.println("Motor test complete");
 }
 
 void stopMotors() {
-    // Stop both motors
     analogWrite(MOTOR_LEFT_IN1, 0);
     analogWrite(MOTOR_LEFT_IN2, 0);
     analogWrite(MOTOR_RIGHT_IN1, 0);
     analogWrite(MOTOR_RIGHT_IN2, 0);
+    Serial.println("Motors stopped");
+}
+
+void setLeftMotor(int speed) {
+    speed = constrain(speed, -MAX_SPEED, MAX_SPEED);
     
-    // Reset current speeds
-    currentLeftSpeed = 0;
-    currentRightSpeed = 0;
+    Serial.print("Left Motor: ");
+    if (speed >= 0) {
+        analogWrite(MOTOR_LEFT_IN1, speed);
+        analogWrite(MOTOR_LEFT_IN2, 0);
+        Serial.print("Forward ");
+    } else {
+        analogWrite(MOTOR_LEFT_IN1, 0);
+        analogWrite(MOTOR_LEFT_IN2, -speed);
+        Serial.print("Reverse ");
+    }
+    Serial.println(abs(speed));
+}
+
+void setRightMotor(int speed) {
+    speed = constrain(speed, -MAX_SPEED, MAX_SPEED);
+    
+    Serial.print("Right Motor: ");
+    if (speed >= 0) {
+        analogWrite(MOTOR_RIGHT_IN1, speed);
+        analogWrite(MOTOR_RIGHT_IN2, 0);
+        Serial.print("Forward ");
+    } else {
+        analogWrite(MOTOR_RIGHT_IN1, 0);
+        analogWrite(MOTOR_RIGHT_IN2, -speed);
+        Serial.print("Reverse ");
+    }
+    Serial.println(abs(speed));
 }
 
 void updateMotors() {
-    // Check for emergency stop condition
-    if (abs(receivedPitch) > EMERGENCY_ANGLE || abs(receivedRoll) > EMERGENCY_ANGLE) {
-        stopMotors();
-        return;
-    }
-
-    float magnitude = sqrt(receivedPitch * receivedPitch + receivedRoll * receivedRoll);
+    Serial.println("\n=== Processing Movement ===");
     
-    // Check minimum movement threshold
-    if (magnitude < MIN_ANGLE) {
+    // Emergency stop check
+    if (abs(receivedPitch) > EMERGENCY_ANGLE || abs(receivedRoll) > EMERGENCY_ANGLE) {
+        Serial.println("EMERGENCY STOP - Angle too high");
         stopMotors();
         return;
     }
 
-    // Calculate movement direction and speed
-    float direction = atan2(receivedRoll, -receivedPitch) * 180.0 / PI;
-    float speedFactor = constrain(magnitude, MIN_ANGLE, MAX_ANGLE);
-    speedFactor = map(speedFactor, MIN_ANGLE, MAX_ANGLE, MIN_SPEED, MAX_SPEED);
+    // Calculate base movement
+    int forwardSpeed = 0;
+    int turnSpeed = 0;
 
-    // Calculate individual motor speeds based on direction
-    float leftSpeed = 0;
-    float rightSpeed = 0;
-
-    // Forward quadrant
-    if (direction >= -90 && direction <= 90) {
-        if (direction <= 0) {
-            // Forward-left
-            rightSpeed = speedFactor;
-            leftSpeed = rightSpeed * (1 + direction/90.0);
-        } else {
-            // Forward-right
-            leftSpeed = speedFactor;
-            rightSpeed = leftSpeed * (1 - direction/90.0);
-        }
+    // Forward/Backward based on pitch
+    if (abs(receivedPitch) > MIN_ANGLE) {
+        forwardSpeed = map(receivedPitch, -MAX_ANGLE, MAX_ANGLE, MAX_SPEED, -MAX_SPEED);
+        Serial.print("Forward Speed: "); Serial.println(forwardSpeed);
     }
-    // Backward quadrant
+
+    // Turning based on roll
+    if (abs(receivedRoll) > MIN_ANGLE) {
+        turnSpeed = map(receivedRoll, -MAX_ANGLE, MAX_ANGLE, -MAX_SPEED/2, MAX_SPEED/2);
+        Serial.print("Turn Speed: "); Serial.println(turnSpeed);
+    }
+
+    // If only turning (no forward/backward movement)
+    if (abs(receivedPitch) <= MIN_ANGLE && abs(receivedRoll) > MIN_ANGLE) {
+        setLeftMotor(turnSpeed);
+        setRightMotor(-turnSpeed);
+    }
+    // Combined movement
+    else if (forwardSpeed != 0 || turnSpeed != 0) {
+        int leftSpeed = forwardSpeed + turnSpeed;
+        int rightSpeed = forwardSpeed - turnSpeed;
+        
+        Serial.print("Combined - Left: "); Serial.print(leftSpeed);
+        Serial.print(" Right: "); Serial.println(rightSpeed);
+        
+        setLeftMotor(leftSpeed);
+        setRightMotor(rightSpeed);
+    }
+    // No movement
     else {
-        if (direction <= -90) {
-            // Backward-left
-            rightSpeed = -speedFactor;
-            leftSpeed = rightSpeed * (1 + (direction+180)/90.0);
-        } else {
-            // Backward-right
-            leftSpeed = -speedFactor;
-            rightSpeed = leftSpeed * (1 + (180-direction)/90.0);
-        }
+        stopMotors();
     }
-
-    // Apply calculated speeds to motors
-    setLeftMotor(leftSpeed);
-    setRightMotor(rightSpeed);
 }
 
 void parseCommand(char* cmd) {
-    // Check for control message format
-    if (cmd[0] != 'C') return;
+    if (cmd[0] != 'C') {
+        Serial.println("Invalid command format");
+        return;
+    }
     
-    // Parse first value (pitch)
     char* ptr = strchr(cmd, ',');
-    if (!ptr) return;
+    if (!ptr) {
+        Serial.println("Missing pitch value");
+        return;
+    }
     ptr++;
     receivedPitch = atof(ptr);
     
-    // Parse second value (roll)
     ptr = strchr(ptr, ',');
-    if (!ptr) return;
+    if (!ptr) {
+        Serial.println("Missing roll value");
+        return;
+    }
     ptr++;
     receivedRoll = atof(ptr);
+    
+    Serial.print("\nReceived - Pitch: "); Serial.print(receivedPitch);
+    Serial.print(" Roll: "); Serial.println(receivedRoll);
 }
 
 void readBluetooth() {
-    // Read incoming Bluetooth data
     while (Serial1.available()) {
         char c = Serial1.read();
         
-        // Store character if buffer has space
         if (bufferIndex < sizeof(buffer) - 1) {
             buffer[bufferIndex++] = c;
         }
         
-        // Process complete message on newline
         if (c == '\n') {
             buffer[bufferIndex] = '\0';
+            Serial.print("Raw BT data: "); Serial.println(buffer);
             parseCommand(buffer);
             updateMotors();
             bufferIndex = 0;
@@ -199,5 +206,5 @@ void readBluetooth() {
 
 void loop() {
     readBluetooth();
-    delay(10);  // Small delay to prevent overwhelming the system
+    delay(10);
 }
